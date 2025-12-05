@@ -267,7 +267,7 @@ export default function HomePage() {
     { trades: [], deposits: [] },
   );
   const [, setLoadingRemote] = useState(true);
-  const [, setErrorRemote] = useState<string | null>(null);
+  const [errorRemote, setErrorRemote] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [sortBy, setSortBy] = useState<"date" | "pnl">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
