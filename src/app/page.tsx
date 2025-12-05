@@ -18,7 +18,6 @@ import {
   Flame,
   LineChart,
   Plus,
-  RefreshCw,
   Sparkles,
   Tag,
   Trash2,
@@ -33,7 +32,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { seedDeposits, seedTrades } from "@/lib/sample-data";
 import {
   aggregateDailyPnl,
   buildEquityCurve,
@@ -266,7 +264,7 @@ const TinyStat = ({
 export default function HomePage() {
   const [rawState, setState, hydrated] = useLocalStorageState<AppState | Trade[]>(
     "reflect-trades",
-    { trades: seedTrades, deposits: seedDeposits },
+    { trades: [], deposits: [] },
   );
   const [, setLoadingRemote] = useState(true);
   const [, setErrorRemote] = useState<string | null>(null);
@@ -392,7 +390,7 @@ export default function HomePage() {
       }
       setState((prev) => {
         const current = Array.isArray(prev)
-          ? { trades: prev, deposits: seedDeposits }
+          ? { trades: prev, deposits: [] }
           : prev;
         return { ...current, trades: [...current.trades, data as Trade] };
       });
@@ -429,7 +427,7 @@ export default function HomePage() {
       }
       setState((prev) => {
         const current = Array.isArray(prev)
-          ? { trades: prev, deposits: seedDeposits }
+          ? { trades: prev, deposits: [] }
           : prev;
         return { ...current, deposits: [...current.deposits, data as CashMove] };
       });
@@ -453,7 +451,7 @@ export default function HomePage() {
       }
     }
     setState((prev) => {
-      const current = Array.isArray(prev) ? { trades: prev, deposits: seedDeposits } : prev;
+      const current = Array.isArray(prev) ? { trades: prev, deposits: [] } : prev;
       return { ...current, trades: current.trades.filter((t) => t.id !== id) };
     });
   };
@@ -473,12 +471,11 @@ export default function HomePage() {
       }
     }
     setState((prev) => {
-      const current = Array.isArray(prev) ? { trades: prev, deposits: seedDeposits } : prev;
+      const current = Array.isArray(prev) ? { trades: prev, deposits: [] } : prev;
       return { ...current, deposits: current.deposits.filter((d) => d.id !== id) };
     });
   };
 
-  const handleResetData = () => setState({ trades: seedTrades, deposits: seedDeposits });
   const handleClear = () => setState({ trades: [], deposits: [] });
   const handleResetFilters = () => setFilters(defaultFilters);
 
@@ -563,7 +560,7 @@ export default function HomePage() {
     if (supabase && supabaseConfigured) {
       await supabase.auth.signOut();
     }
-    setState({ trades: seedTrades, deposits: seedDeposits });
+    setState({ trades: [], deposits: [] });
   };
 
   if (!session) {
@@ -664,13 +661,6 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={handleResetData}
-              className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              <RefreshCw size={16} />
-              Recharger l&apos;exemple
-            </button>
             <button
               onClick={handleSignOut}
               className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"

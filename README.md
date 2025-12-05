@@ -7,7 +7,7 @@ Reflect est une web app Next.js (App Router) pensée pour remplacer un fichier E
 - Dashboard visuel : equity curve, heatmap calendrier façon GitHub, net P&L, cartes KPI (win rate, R:R, profit factor, max drawdown, moyennes gain/perte).
 - Moteur de tri & tags : filtres par actif, stratégie, setup, erreur, session, côté et plage de dates, tri par date ou P&L.
 - Gestion du solde : ajoutez vos dépôts (capital) sans impacter le P&L pour visualiser le capital net.
-- Persistance : par défaut Supabase (trades/dépôts) si les clés sont présentes, sinon fallback `localStorage` (un bouton recharge les données d’exemple).
+- Persistance : Supabase (trades/dépôts) si les clés sont présentes, sinon fallback `localStorage` (sans données d’exemple).
 - Design épuré inspiré de Finary, prêt pour un déploiement Vercel.
 - Authentification : Supabase Auth email/mot de passe (formulaire sur la page, bouton de déconnexion).
 
