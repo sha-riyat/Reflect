@@ -438,6 +438,46 @@ export default function HomePage() {
     run();
   };
 
+  const deleteTrade = async (id: string) => {
+    const client = supabase;
+    if (session && client && supabaseConfigured) {
+      const { error } = await client
+        .from("trades")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", session.user.id);
+      if (error) {
+        console.error("Suppression trade supabase", error);
+        setErrorRemote("Impossible de supprimer le trade (Supabase)");
+        return;
+      }
+    }
+    setState((prev) => {
+      const current = Array.isArray(prev) ? { trades: prev, deposits: seedDeposits } : prev;
+      return { ...current, trades: current.trades.filter((t) => t.id !== id) };
+    });
+  };
+
+  const deleteDeposit = async (id: string) => {
+    const client = supabase;
+    if (session && client && supabaseConfigured) {
+      const { error } = await client
+        .from("deposits")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", session.user.id);
+      if (error) {
+        console.error("Suppression dépôt supabase", error);
+        setErrorRemote("Impossible de supprimer le dépôt (Supabase)");
+        return;
+      }
+    }
+    setState((prev) => {
+      const current = Array.isArray(prev) ? { trades: prev, deposits: seedDeposits } : prev;
+      return { ...current, deposits: current.deposits.filter((d) => d.id !== id) };
+    });
+  };
+
   const handleResetData = () => setState({ trades: seedTrades, deposits: seedDeposits });
   const handleClear = () => setState({ trades: [], deposits: [] });
   const handleResetFilters = () => setFilters(defaultFilters);
@@ -748,33 +788,38 @@ export default function HomePage() {
           </Card>
 
           <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Journal</p>
-                <p className="text-xl font-semibold text-slate-50">
-                  {filteredTrades.length} trades filtrés
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <TinyStat label="Net P&L" value={currency.format(metrics.netPnl)} />
-                <TinyStat label="Capital net" value={currency.format(netCapital)} />
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-400">Journal</p>
+              <p className="text-xl font-semibold text-slate-50">
+                {filteredTrades.length} trades filtrés
+              </p>
             </div>
-            <div className="mt-4 space-y-3">
-              {filteredTrades.length === 0 && (
-                <div className="flex items-center justify-between rounded-2xl border border-dashed border-white/10 px-3 py-3 text-sm text-slate-400">
-                  Aucun trade pour ces filtres. Ajustez le moteur de tri ou ajoutez un trade.
-                </div>
-              )}
-              {filteredTrades.map((trade) => {
-                const pnl = calculatePnl(trade);
-                return (
-                  <div
-                    key={trade.id}
-                    className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
+            <div className="flex gap-2">
+              <TinyStat label="Net P&L" value={currency.format(metrics.netPnl)} />
+              <TinyStat label="Capital net" value={currency.format(netCapital)} />
+            </div>
+          </div>
+          {errorRemote ? (
+            <div className="mt-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
+              {errorRemote}
+            </div>
+          ) : null}
+          <div className="mt-4 space-y-3">
+            {filteredTrades.length === 0 && (
+              <div className="flex items-center justify-between rounded-2xl border border-dashed border-white/10 px-3 py-3 text-sm text-slate-400">
+                Aucun trade pour ces filtres. Ajustez le moteur de tri ou ajoutez un trade.
+              </div>
+            )}
+            {filteredTrades.map((trade) => {
+              const pnl = calculatePnl(trade);
+              return (
+                <div
+                  key={trade.id}
+                  className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
                         <span
                           className={clsx(
                             "flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold",
@@ -810,17 +855,26 @@ export default function HomePage() {
                           ) : null}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span
-                          className={clsx(
-                            "text-lg font-semibold",
-                            pnl >= 0 ? "text-emerald-300" : "text-rose-300",
-                          )}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => deleteTrade(trade.id)}
+                          className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:border-rose-400/50 hover:bg-rose-500/15 hover:text-rose-100"
+                          title="Supprimer le trade"
                         >
-                          {pnl >= 0 ? "+" : ""}
-                          {currency.format(pnl)}
-                        </span>
-                        <p className="text-[11px] text-slate-400">Net après frais</p>
+                          <Trash2 size={14} />
+                        </button>
+                        <div className="text-right">
+                          <span
+                            className={clsx(
+                              "text-lg font-semibold",
+                              pnl >= 0 ? "text-emerald-300" : "text-rose-300",
+                            )}
+                          >
+                            {pnl >= 0 ? "+" : ""}
+                            {currency.format(pnl)}
+                          </span>
+                          <p className="text-[11px] text-slate-400">Net</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1112,11 +1166,20 @@ export default function HomePage() {
                         <span className="text-xs text-slate-400">• {deposit.note}</span>
                       ) : null}
                     </div>
-                <span className="text-sm font-semibold text-emerald-300">
-                  +{currency.format(deposit.amount)}
-                </span>
-              </div>
-            ))}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => deleteDeposit(deposit.id)}
+                        className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:border-rose-400/50 hover:bg-rose-500/15 hover:text-rose-100"
+                        title="Supprimer le dépôt"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                      <span className="text-sm font-semibold text-emerald-300">
+                        +{currency.format(deposit.amount)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
             </div>
             </Card>
           </div>
