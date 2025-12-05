@@ -31,7 +31,19 @@ npm run dev
   - `trades`: `id uuid default uuid_generate_v4() primary key`, `user_id uuid references auth.users`, `date date`, `asset text`, `side text`, `outcome text`, `amount numeric`, `note text`.
   - `deposits`: `id uuid default uuid_generate_v4() primary key`, `user_id uuid references auth.users`, `date date`, `amount numeric`, `note text`.
 - Ajoutez un index sur `date` pour chaque table.
-- Activez les RLS et ajoutez des policies pour que chaque utilisateur ne lise/écrive que ses lignes (`user_id = auth.uid()`).
+- Activez les RLS et ajoutez des policies pour que chaque utilisateur ne lise/écrive/supprime que ses lignes (`user_id = auth.uid()`), par ex. :
+  ```sql
+  alter table trades enable row level security;
+  alter table deposits enable row level security;
+
+  create policy "trades_select_own" on trades for select using (auth.uid() = user_id);
+  create policy "trades_insert_own" on trades for insert with check (auth.uid() = user_id);
+  create policy "trades_delete_own" on trades for delete using (auth.uid() = user_id);
+
+  create policy "deposits_select_own" on deposits for select using (auth.uid() = user_id);
+  create policy "deposits_insert_own" on deposits for insert with check (auth.uid() = user_id);
+  create policy "deposits_delete_own" on deposits for delete using (auth.uid() = user_id);
+  ```
 - Ajoutez un fichier `.env.local` :
   ```env
   NEXT_PUBLIC_SUPABASE_URL=https://votre-url.supabase.co
