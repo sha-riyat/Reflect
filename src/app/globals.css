@@ -1,40 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0b0d13;
-  --foreground: #e7ecf5;
+  --background: #08130d;
+  --foreground: #e8f5ed;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-surface: #0f131c;
+  --color-surface: #0c1a12;
   --color-ink: var(--foreground);
-  --color-muted: #9ba3b5;
-  --color-accent: #7af7c5;
-  --color-accent-strong: #52e3ad;
+  --color-muted: #9bb8a7;
+  --color-accent: #19e27a;
+  --color-accent-strong: #0ecf68;
   --color-rose: #f87171;
   --color-amber: #fbbf24;
-  --color-border: #1f2937;
+  --color-border: #123421;
   --font-sans: var(--font-sans);
 }
 
 body {
-  background: radial-gradient(circle at 18% 20%, rgba(82, 227, 173, 0.08), transparent 28%),
-    radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 24%),
-    linear-gradient(160deg, #0b0d13 0%, #0a0c12 40%, #080910 100%);
+  background: radial-gradient(circle at 20% 15%, rgba(25, 226, 122, 0.08), transparent 32%),
+    radial-gradient(circle at 80% 0%, rgba(37, 99, 235, 0.08), transparent 28%),
+    linear-gradient(180deg, #08130d 0%, #060f0a 55%, #050c08 100%);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   min-height: 100vh;
 }
 
 ::selection {
-  background: rgba(122, 247, 197, 0.25);
-  color: #f8fafc;
+  background: rgba(25, 226, 122, 0.2);
+  color: #e8f5ed;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #475569 transparent;
+  scrollbar-color: #1d4630 transparent;
 }
 
 *::-webkit-scrollbar {
@@ -43,6 +43,6 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #1d4630;
   border-radius: 999px;
 }
