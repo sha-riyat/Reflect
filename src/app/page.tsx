@@ -14,7 +14,6 @@ import {
   ArrowUpRight,
   BadgeCheck,
   BarChart3,
-  Filter,
   Flame,
   LineChart,
   Plus,
@@ -106,7 +105,7 @@ const Card = ({
 }) => (
   <div
     className={clsx(
-      "rounded-3xl border border-white/5 bg-gradient-to-br from-[#0f131c]/90 via-[#0b0f17]/90 to-[#0f131c]/90 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur",
+      "rounded-3xl border border-emerald-500/10 bg-gradient-to-br from-[#0a1410]/95 via-[#07100c]/95 to-[#0d1b12]/90 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-emerald-500/5 backdrop-blur",
       className,
     )}
   >
@@ -125,14 +124,14 @@ const StatCard = ({
   helper?: string;
   tone?: "positive" | "negative" | "neutral";
 }) => (
-  <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur">
-    <p className="text-sm text-slate-400">{label}</p>
+  <div className="rounded-2xl border border-emerald-500/10 bg-[#0d1b12]/80 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur">
+    <p className="text-xs uppercase tracking-wide text-emerald-200/80">{label}</p>
     <div className="mt-2 flex flex-col gap-2">
       <span className="text-2xl font-semibold text-slate-50">{value}</span>
       {helper ? (
         <span
           className={clsx(
-            "inline-flex w-fit max-w-full items-center gap-1 rounded-full px-2 py-1 text-xs font-medium",
+            "inline-flex w-fit max-w-full items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold",
             tone === "positive" &&
               "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-400/20",
             tone === "negative" &&
@@ -356,6 +355,20 @@ export default function HomePage() {
 
   const unique = {
     assets: Array.from(new Set(trades.map((t) => t.asset))),
+  };
+
+  const winCount = filteredTrades.filter((t) => t.outcome === "win").length;
+  const lossCount = filteredTrades.filter((t) => t.outcome === "loss").length;
+  const outcomeTotal = winCount + lossCount;
+  const winShare = outcomeTotal ? Math.round((winCount / outcomeTotal) * 100) : 0;
+  const lossShare = outcomeTotal ? 100 - winShare : 0;
+
+  const handleScrollToActions = () =>
+    actionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const handleSignOut = async () => {
+    if (!supabase || !supabaseConfigured) return;
+    await supabase.auth.signOut();
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -622,29 +635,61 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-14 pt-8 text-slate-100 sm:px-6">
-      <header className="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-[#0d1118] via-[#0b0f16] to-[#0d1118] p-6 text-white shadow-[0_25px_80px_rgba(0,0,0,0.45)] ring-1 ring-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(122,247,197,0.18),transparent_30%),radial-gradient(circle_at_90%_10%,rgba(59,130,246,0.2),transparent_25%)]" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-[#1a2233] to-[#0b101a] text-xl font-semibold shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+    <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 text-slate-100 sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-20 mb-6">
+        <div className="flex items-center justify-between rounded-2xl border border-emerald-500/15 bg-[#0c1811]/90 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.45)] backdrop-blur">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/30 via-emerald-500/10 to-transparent text-lg font-semibold text-emerald-100 ring-1 ring-emerald-500/40">
               R
             </div>
             <div>
-              <div className="flex items-center gap-2 text-sm uppercase tracking-[0.2em] text-emerald-200">
-                <Sparkles size={16} />
-                Reflect
+              <p className="text-xs uppercase tracking-[0.25em] text-emerald-200/90">Reflect</p>
+              <p className="text-sm text-slate-300">Performance trader privée</p>
+            </div>
+          </div>
+          <nav className="hidden items-center gap-2 text-sm font-semibold text-slate-200 md:flex">
+            <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-emerald-100">Dashboard</span>
+            <span className="rounded-full px-3 py-1 hover:bg-white/5">Journal</span>
+            <span className="rounded-full px-3 py-1 hover:bg-white/5">Analytics</span>
+            <span className="rounded-full px-3 py-1 hover:bg-white/5">Paramètres</span>
+          </nav>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleScrollToActions}
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-[0_12px_28px_rgba(16,185,129,0.35)] transition hover:-translate-y-[1px] hover:bg-emerald-400"
+            >
+              <Plus size={16} />
+              Ajouter un événement
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="hidden rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200 hover:border-emerald-400/40 hover:text-emerald-100 sm:inline-flex"
+            >
+              Déconnexion
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <section className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+        <Card className="relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(25,226,122,0.16),transparent_35%),radial-gradient(circle_at_85%_0%,rgba(16,185,129,0.14),transparent_32%)]" />
+          <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-100 ring-1 ring-emerald-500/30">
+                <Sparkles size={14} />
+                Vue d'ensemble
               </div>
-              <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
-                Tableau de bord performance
+              <h1 className="mt-3 text-3xl font-semibold leading-tight md:text-4xl">
+                Tableau de bord Reflect
               </h1>
-              <p className="mt-1 max-w-2xl text-sm text-slate-300">
-                Suivi consolidé des gains/pertes et des dépôts, avec synchronisation Supabase.
+              <p className="mt-2 max-w-2xl text-sm text-slate-300">
+                Suivi unifié des trades, dépôts et indicateurs clés. Pensé pour remplacer définitivement ton tableur.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">
                   <BadgeCheck size={12} className="inline me-1" />
-                  Profil privé
+                  Données privées
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">
                   <Flame size={12} className="inline me-1" />
@@ -652,87 +697,233 @@ export default function HomePage() {
                 </span>
               </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <a
-              href="#actions"
-              onClick={(e) => {
-                e.preventDefault();
-                actionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-              className="flex items-center gap-2 rounded-xl bg-[#7af7c5] px-5 py-3 text-sm font-semibold text-[#0b0d13] shadow-[0_12px_30px_rgba(122,247,197,0.35)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_40px_rgba(122,247,197,0.45)]"
-            >
-              <Plus size={16} />
-              Nouvelle saisie
-            </a>
-          </div>
-        </div>
-      </header>
-
-      <section className="grid gap-4 lg:grid-cols-[1.55fr_1fr]">
-        <div className="space-y-4">
-
-          <Card>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-sm font-semibold text-slate-200">
-              <Filter size={16} />
-              Filtrage & tri
+            <div className="flex flex-col gap-3 rounded-2xl border border-emerald-500/15 bg-[#0c1811]/70 p-4 text-sm shadow-inner">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/90">Net P&L</p>
+                  <p className={clsx("text-2xl font-semibold", metrics.netPnl >= 0 ? "text-emerald-200" : "text-rose-200")}>
+                    {currency.format(metrics.netPnl)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/90">Capital</p>
+                  <p className="text-2xl font-semibold text-slate-50">{currency.format(netCapital)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-300">
+                <LineChart size={14} className="text-emerald-300" />
+                {pnlTrend === 0
+                  ? "Stabilité récente"
+                  : `${pnlTrend > 0 ? "+" : ""}${currency.format(pnlTrend)} sur les derniers mouvements`}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-300">
+                <BadgeCheck size={14} className="text-emerald-300" />
+                {session.user.email}
+              </div>
+              <button
+                onClick={handleScrollToActions}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-slate-100 hover:bg-white/15"
+              >
+                Ajouter un trade ou un dépôt
+              </button>
             </div>
-            <Pill label="Actif" value={filters.asset === "all" ? "Tous" : filters.asset} />
-            <Pill
-              label="Résultat"
-              value={filters.outcome === "all" ? "Tous" : filters.outcome}
+          </div>
+        </Card>
+
+        <Card className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(25,226,122,0.1),transparent_40%)]" />
+          <div className="relative flex flex-col gap-3">
+            <p className="text-sm text-slate-400">Synchronisation Supabase</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-lg font-semibold text-slate-50">Session active</p>
+                <p className="text-sm text-slate-300">{session.user.email}</p>
+              </div>
+              <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-100 ring-1 ring-emerald-500/30">
+                Connecté
+              </span>
+            </div>
+            {errorRemote ? (
+              <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                {errorRemote}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-100">
+                Données synchronisées sur Supabase et conservées en local.
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <TinyStat label="Trades" value={`${trades.length}`} />
+              <TinyStat label="Dépôts" value={`${deposits.length}`} />
+              <TinyStat label="Win rate" value={`${metrics.winRate.toFixed(1)}%`} />
+              <TinyStat label="Capital net" value={currency.format(netCapital)} />
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <section className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard
+          label="Net P&L"
+          value={currency.format(metrics.netPnl)}
+          helper={
+            pnlTrend === 0
+              ? undefined
+              : `${pnlTrend > 0 ? "+" : ""}${currency.format(pnlTrend)} vs derniers trades`
+          }
+          tone={metrics.netPnl >= 0 ? "positive" : "negative"}
+        />
+        <StatCard
+          label="Capital net"
+          value={currency.format(netCapital)}
+          helper={`Dépôts ${currency.format(totalDeposits)}`}
+          tone={netCapital >= 0 ? "positive" : "neutral"}
+        />
+        <StatCard
+          label="Win rate"
+          value={`${metrics.winRate.toFixed(1)}%`}
+          helper={`${winCount} gains / ${lossCount} pertes`}
+          tone={metrics.winRate >= 50 ? "positive" : "neutral"}
+        />
+        <StatCard
+          label="Profit factor"
+          value={metrics.profitFactor ? metrics.profitFactor.toFixed(2) : "–"}
+          helper=">1 = profitable"
+          tone={
+            metrics.profitFactor && metrics.profitFactor >= 1 ? "positive" : "neutral"
+          }
+        />
+        <StatCard
+          label="Max drawdown"
+          value={currency.format(metrics.maxDrawdown)}
+          helper="Creux cumulé"
+          tone={metrics.maxDrawdown > 0 ? "negative" : "neutral"}
+        />
+      </section>
+
+      <section className="mt-4 grid gap-4 xl:grid-cols-[1.7fr_1fr]">
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm text-slate-400">Courbe d'equity</p>
+              <p className="text-xl font-semibold text-slate-50">Performance historique</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Pill label="Trades" value={filteredTrades.length} />
+              <Pill label="Dépôts" value={deposits.length} />
+              <Pill label="P&L net" value={currency.format(metrics.netPnl)} />
+            </div>
+          </div>
+          <div className="mt-4 h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={equityCurve}>
+                <defs>
+                  <linearGradient id="pnl" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.5} />
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.08} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#153220" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(value) => format(parseISO(value), "dd MMM")}
+                  tick={{ fill: "#9bb8a7", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tickFormatter={(value) => currency.format(value).replace("$", "")}
+                  tick={{ fill: "#9bb8a7", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={60}
+                />
+                <Tooltip content={<EquityTooltip />} />
+                <Area
+                  dataKey="value"
+                  stroke="#22c55e"
+                  fill="url(#pnl)"
+                  strokeWidth={2.4}
+                  type="monotone"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-300">
+            <TagBadge label={`Max drawdown ${currency.format(metrics.maxDrawdown)}`} />
+            <TagBadge
+              label={
+                metrics.averageWin
+                  ? `Gain moyen ${currency.format(metrics.averageWin)}`
+                  : undefined
+              }
+            />
+            <TagBadge
+              label={
+                metrics.averageLoss
+                  ? `Perte moyenne ${currency.format(Math.abs(metrics.averageLoss))}`
+                  : undefined
+              }
+            />
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-400">Répartition</p>
+              <p className="text-lg font-semibold text-slate-50">Issues & risques</p>
+            </div>
+            <Tag size={18} className="text-emerald-300" />
+          </div>
+          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative mx-auto h-40 w-40">
+              <div
+                className="absolute inset-0 rounded-full border border-emerald-500/20 bg-[conic-gradient(#22c55e_0deg,#22c55e_var(--win),#1a2c22_var(--win),#1a2c22_360deg)] shadow-[0_10px_40px_rgba(0,0,0,0.45)]"
+                style={{ ["--win" as string]: `${(winShare / 100) * 360}deg` }}
               />
-              <Pill label="Côté" value={filters.side === "all" ? "Tous" : filters.side} />
-              <div className="ms-auto flex gap-2">
-                <button
-                  onClick={handleResetFilters}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-sm font-medium text-slate-200 hover:border-white/20"
-                >
-                  Reset filtres
-                </button>
-                <button
-                  onClick={handleClear}
-                  className="flex items-center gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-500/15"
-                >
-                  <Trash2 size={15} />
-                  Tout vider
-                </button>
+              <div className="absolute inset-4 rounded-full border border-white/5 bg-[#0d1b12]/90 flex flex-col items-center justify-center text-center">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Win rate</p>
+                <p className="text-2xl font-semibold text-slate-50">{winShare}%</p>
+                <p className="text-[11px] text-slate-400">{winCount} gains / {lossCount} pertes</p>
               </div>
             </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-3 lg:grid-cols-4">
-              <SelectField
-                label="Actif"
-                value={filters.asset}
-                onChange={(value) => setFilters((prev) => ({ ...prev, asset: value }))}
-                options={unique.assets}
-              />
-              <SelectField
-                label="Résultat"
-                value={filters.outcome}
-                onChange={(value) => setFilters((prev) => ({ ...prev, outcome: value }))}
-                options={["win", "loss"]}
-              />
-              <SelectField
-                label="Côté"
-                value={filters.side}
-                onChange={(value) => setFilters((prev) => ({ ...prev, side: value }))}
-                options={["long", "short"]}
-              />
-              <InputField
-                label="Du"
-                type="date"
-                value={filters.dateFrom}
-                onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value }))}
-              />
-              <InputField
-                label="Au"
-                type="date"
-                value={filters.dateTo}
-                onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value }))}
-              />
+            <div className="flex-1 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300">Trades totaux</span>
+                <span className="font-semibold text-slate-50">{filteredTrades.length}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300">Dépôts cumulés</span>
+                <span className="font-semibold text-slate-50">{currency.format(totalDeposits)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300">Profit factor</span>
+                <span className="font-semibold text-slate-50">
+                  {metrics.profitFactor ? metrics.profitFactor.toFixed(2) : "–"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-300">Max drawdown</span>
+                <span className="font-semibold text-rose-200">{currency.format(metrics.maxDrawdown)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" /> Gagnants ({winShare}%)
+                <span className="inline-flex h-2 w-2 rounded-full bg-rose-400" /> Perdants ({lossShare}%)
+              </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-400">
+          </div>
+        </Card>
+      </section>
+
+      <section className="mt-4 grid gap-4 xl:grid-cols-[1.35fr_1fr]">
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm text-slate-400">Journal des trades</p>
+              <p className="text-xl font-semibold text-slate-50">Vue tabulaire & suppression</p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-400">
               <button
                 onClick={() => {
                   setSortBy("date");
@@ -762,200 +953,194 @@ export default function HomePage() {
                 Trier par P&L ({sortDir === "asc" ? "↑" : "↓"})
               </button>
             </div>
-          </Card>
-
-          <Card>
-          <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Journal consolidé</p>
-                <p className="text-xl font-semibold text-slate-50">
-                  {filteredTrades.length} trades filtrés
-                </p>
-              </div>
-            <div className="flex gap-2">
-              <TinyStat label="Net P&L" value={currency.format(metrics.netPnl)} />
-              <TinyStat label="Capital net" value={currency.format(netCapital)} />
-            </div>
           </div>
-          {errorRemote ? (
-            <div className="mt-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
-              {errorRemote}
-            </div>
-          ) : null}
-          <div className="mt-4 space-y-3">
-            {filteredTrades.length === 0 && (
-              <div className="flex items-center justify-between rounded-2xl border border-dashed border-white/10 px-3 py-3 text-sm text-slate-400">
-                Aucun trade pour ces filtres. Ajustez le moteur de tri ou ajoutez un trade.
-              </div>
-            )}
-            {filteredTrades.map((trade) => {
-              const pnl = calculatePnl(trade);
-              return (
-                <div
-                  key={trade.id}
-                  className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <span
-                          className={clsx(
-                            "flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold",
-                            pnl >= 0
-                              ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200"
-                              : "border-rose-400/40 bg-rose-400/10 text-rose-200",
-                          )}
-                        >
-                          {trade.asset.slice(0, 3)}
-                        </span>
-                        <div>
-                          <div className="flex items-center gap-2 text-sm font-semibold text-slate-50">
-                            {trade.asset}
-                            <span
-                              className={clsx(
-                                "rounded-full px-2 py-1 text-[11px] font-semibold tracking-wide",
-                                trade.side === "long"
-                                  ? "bg-emerald-400/10 text-emerald-200"
-                                  : "bg-rose-400/10 text-rose-200",
-                              )}
-                            >
-                              {trade.side}
-                            </span>
-                            <span className="rounded-full bg-white/5 px-2 py-1 text-[11px] font-semibold text-slate-300">
-                              {format(parseISO(trade.date), "dd MMM")}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-400">
-                            Résultat: {trade.outcome === "win" ? "Gain" : "Perte"}
-                          </p>
-                          {trade.note ? (
-                            <p className="mt-1 text-xs text-slate-500">Note : {trade.note}</p>
-                          ) : null}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => deleteTrade(trade.id)}
-                          className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:border-rose-400/50 hover:bg-rose-500/15 hover:text-rose-100"
-                          title="Supprimer le trade"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                        <div className="text-right">
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+            <SelectField
+              label="Actif"
+              value={filters.asset}
+              onChange={(value) => setFilters((prev) => ({ ...prev, asset: value }))}
+              options={unique.assets}
+            />
+            <SelectField
+              label="Résultat"
+              value={filters.outcome}
+              onChange={(value) => setFilters((prev) => ({ ...prev, outcome: value }))}
+              options={["win", "loss"]}
+            />
+            <SelectField
+              label="Côté"
+              value={filters.side}
+              onChange={(value) => setFilters((prev) => ({ ...prev, side: value }))}
+              options={["long", "short"]}
+            />
+            <InputField
+              label="Du"
+              type="date"
+              value={filters.dateFrom}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateFrom: value }))}
+            />
+            <InputField
+              label="Au"
+              type="date"
+              value={filters.dateTo}
+              onChange={(value) => setFilters((prev) => ({ ...prev, dateTo: value }))}
+            />
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              onClick={handleResetFilters}
+              className="rounded-xl border border-white/10 px-3 py-2 text-sm font-medium text-slate-200 hover:border-white/20"
+            >
+              Réinitialiser les filtres
+            </button>
+            <button
+              onClick={handleClear}
+              className="flex items-center gap-2 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-500/15"
+            >
+              <Trash2 size={15} />
+              Tout vider
+            </button>
+          </div>
+
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full border-separate border-spacing-y-2 text-sm">
+              <thead className="text-xs uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="text-left">Ticker</th>
+                  <th className="text-left">Date</th>
+                  <th className="text-left">Côté</th>
+                  <th className="text-left">Résultat</th>
+                  <th className="text-left">Montant</th>
+                  <th className="text-left">P&L net</th>
+                  <th className="text-left">Note</th>
+                  <th className="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTrades.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-4 text-center text-sm text-slate-400">
+                      Aucun trade pour ces filtres. Ajuste les sélecteurs ou ajoute un nouveau trade.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTrades.map((trade) => {
+                    const pnl = calculatePnl(trade);
+                    return (
+                      <tr
+                        key={trade.id}
+                        className="rounded-2xl border border-emerald-500/10 bg-[#0d1b12]/80 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
+                      >
+                        <td className="rounded-l-2xl px-3 py-3 font-semibold text-slate-50">
+                          {trade.asset}
+                        </td>
+                        <td className="px-3 py-3 text-slate-300">
+                          {format(parseISO(trade.date), "dd MMM yyyy")}
+                        </td>
+                        <td className="px-3 py-3">
                           <span
                             className={clsx(
-                              "text-lg font-semibold",
-                              pnl >= 0 ? "text-emerald-300" : "text-rose-300",
+                              "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide",
+                              trade.side === "long"
+                                ? "bg-emerald-500/15 text-emerald-100"
+                                : "bg-rose-500/15 text-rose-100",
                             )}
                           >
-                            {pnl >= 0 ? "+" : ""}
-                            {currency.format(pnl)}
+                            {trade.side}
                           </span>
-                          <p className="text-[11px] text-slate-400">Net</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <span
+                            className={clsx(
+                              "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide",
+                              trade.outcome === "win"
+                                ? "bg-emerald-500/15 text-emerald-100"
+                                : "bg-rose-500/15 text-rose-100",
+                            )}
+                          >
+                            {trade.outcome === "win" ? "Gagnant" : "Perdant"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-slate-200">{currency.format(trade.amount)}</td>
+                        <td
+                          className={clsx(
+                            "px-3 py-3 font-semibold",
+                            pnl >= 0 ? "text-emerald-300" : "text-rose-300",
+                          )}
+                        >
+                          {pnl >= 0 ? "+" : ""}
+                          {currency.format(pnl)}
+                        </td>
+                        <td className="px-3 py-3 text-slate-300 max-w-[180px]">
+                          {trade.note || "—"}
+                        </td>
+                        <td className="rounded-r-2xl px-3 py-3 text-right">
+                          <button
+                            onClick={() => deleteTrade(trade.id)}
+                            className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:border-rose-400/50 hover:bg-rose-500/15 hover:text-rose-100"
+                            title="Supprimer le trade"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
         <div className="space-y-4">
           <Card>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Synthèse financière</p>
-                <p className="text-xl font-semibold text-slate-50">Performance consolidée</p>
+                <p className="text-sm text-slate-400">Dépôts</p>
+                <p className="text-lg font-semibold text-slate-50">Historique des apports</p>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">
-                <LineChart size={14} />
-                {filteredTrades.length} trades
-              </span>
+              <Pill label="Total" value={currency.format(totalDeposits)} />
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <StatCard
-                label="Net P&L"
-                value={currency.format(metrics.netPnl)}
-                helper={
-                  pnlTrend === 0
-                    ? undefined
-                    : `${pnlTrend > 0 ? "+" : ""}${currency.format(pnlTrend)} vs derniers trades`
-                }
-                tone={metrics.netPnl >= 0 ? "positive" : "negative"}
-              />
-              <StatCard
-                label="Capital net"
-                value={currency.format(netCapital)}
-                helper={`Dépôts ${currency.format(totalDeposits)}`}
-                tone={netCapital >= 0 ? "positive" : "neutral"}
-              />
-              <StatCard
-                label="Win rate"
-                value={`${metrics.winRate.toFixed(1)}%`}
-                helper={`${metrics.totalTrades} trades`}
-                tone={metrics.winRate >= 50 ? "positive" : "neutral"}
-              />
-              <StatCard
-                label="Profit factor"
-                value={metrics.profitFactor ? metrics.profitFactor.toFixed(2) : "–"}
-                helper=">1 = profitable"
-                tone={
-                  metrics.profitFactor && metrics.profitFactor >= 1 ? "positive" : "neutral"
-                }
-              />
-            </div>
-            <div className="mt-4 h-60 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={equityCurve}>
-                  <defs>
-                    <linearGradient id="pnl" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="5%" stopColor="#7af7c5" stopOpacity={0.5} />
-                      <stop offset="95%" stopColor="#7af7c5" stopOpacity={0.05} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(value) => format(parseISO(value), "dd MMM")}
-                    tick={{ fill: "#94a3b8", fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tickFormatter={(value) => currency.format(value).replace("€", "")}
-                    tick={{ fill: "#94a3b8", fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={60}
-                  />
-                  <Tooltip content={<EquityTooltip />} />
-                  <Area
-                    dataKey="value"
-                    stroke="#7af7c5"
-                    fill="url(#pnl)"
-                    strokeWidth={2.4}
-                    type="monotone"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-300">
-              <TagBadge label={`Max drawdown ${currency.format(metrics.maxDrawdown)}`} />
-              <TagBadge
-                label={
-                  metrics.averageWin
-                    ? `Gain moyen ${currency.format(metrics.averageWin)}`
-                    : undefined
-                }
-              />
-              <TagBadge
-                label={
-                  metrics.averageLoss
-                    ? `Perte moyenne ${currency.format(Math.abs(metrics.averageLoss))}`
-                    : undefined
-                }
-              />
+            <div className="mt-3 space-y-2">
+              {deposits.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-400">
+                  Aucun dépôt enregistré pour l'instant.
+                </div>
+              ) : (
+                deposits
+                  .slice()
+                  .sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime())
+                  .map((deposit) => (
+                    <div
+                      key={deposit.id}
+                      className="flex items-center justify-between rounded-2xl border border-emerald-500/10 bg-[#0d1b12]/80 px-3 py-2 text-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[11px] font-semibold text-emerald-100">
+                          {format(parseISO(deposit.date), "dd MMM")}
+                        </span>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-slate-50">Dépôt</span>
+                          <span className="text-xs text-slate-400">{deposit.note || "—"}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-emerald-300">
+                          +{currency.format(deposit.amount)}
+                        </span>
+                        <button
+                          onClick={() => deleteDeposit(deposit.id)}
+                          className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:border-rose-400/50 hover:bg-rose-500/15 hover:text-rose-100"
+                          title="Supprimer le dépôt"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+              )}
             </div>
           </Card>
 
@@ -963,9 +1148,7 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Heatmap</p>
-                <p className="text-lg font-semibold text-slate-50">
-                  Jours gagnants / perdants
-                </p>
+                <p className="text-lg font-semibold text-slate-50">Jours gagnants / perdants</p>
               </div>
               <BarChart3 className="text-emerald-300" />
             </div>
@@ -983,68 +1166,71 @@ export default function HomePage() {
               </div>
             </div>
           </Card>
+        </div>
+      </section>
 
-          <div id="actions" ref={actionRef}>
-            <Card className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-400">Actions</p>
-                  <p className="text-lg font-semibold text-slate-50">
-                    Ajouter un trade ou un dépôt
-                  </p>
-                </div>
-              <div className="flex gap-2 rounded-full border border-white/10 bg-white/5 p-1 text-xs font-semibold text-slate-200">
-                <button
-                  onClick={() => setActionTab("trade")}
-                  className={clsx(
-                    "rounded-full px-3 py-1 transition",
-                    actionTab === "trade" ? "bg-emerald-400/20 text-emerald-100" : "",
-                  )}
-                >
-                  Trade
-                </button>
-                <button
-                  onClick={() => setActionTab("deposit")}
-                  className={clsx(
-                    "rounded-full px-3 py-1 transition",
-                    actionTab === "deposit" ? "bg-emerald-400/20 text-emerald-100" : "",
-                  )}
-                >
-                  Dépôt
-                </button>
-              </div>
+      <section id="actions" ref={actionRef} className="mt-6">
+        <Card className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm text-slate-400">Saisie</p>
+              <p className="text-xl font-semibold text-slate-50">Ajouter un trade ou un dépôt</p>
+              <p className="text-sm text-slate-300">
+                Formulaire compact inspiré du design pro : résultat, montant en USD et note optionnelle.
+              </p>
             </div>
+            <div className="flex gap-2 rounded-full border border-white/10 bg-white/5 p-1 text-xs font-semibold text-slate-200">
+              <button
+                onClick={() => setActionTab("trade")}
+                className={clsx(
+                  "rounded-full px-3 py-1 transition",
+                  actionTab === "trade" ? "bg-emerald-400/20 text-emerald-100" : "",
+                )}
+              >
+                Trade
+              </button>
+              <button
+                onClick={() => setActionTab("deposit")}
+                className={clsx(
+                  "rounded-full px-3 py-1 transition",
+                  actionTab === "deposit" ? "bg-emerald-400/20 text-emerald-100" : "",
+                )}
+              >
+                Dépôt
+              </button>
+            </div>
+          </div>
 
-            {actionTab === "trade" ? (
-              <form onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-3">
-                <InputField
-                  label="Date"
-                  type="date"
-                  value={draft.date}
-                  onChange={(value) => setDraft((prev) => ({ ...prev, date: value }))}
-                />
-                <InputField
+          {actionTab === "trade" ? (
+            <form onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-3">
+              <InputField
+                label="Date"
+                type="date"
+                value={draft.date}
+                onChange={(value) => setDraft((prev) => ({ ...prev, date: value }))}
+              />
+              <InputField
                 label="Actif"
                 value={draft.asset}
                 onChange={(value) => setDraft((prev) => ({ ...prev, asset: value }))}
                 placeholder="EURUSD"
               />
-                <SelectField
-                  label="Côté"
-                  value={draft.side}
-                  onChange={(value) =>
-                    setDraft((prev) => ({ ...prev, side: value as DraftTrade["side"] }))
-                  }
-                  options={["long", "short"]}
-                />
-                <InputField
-                  label="Résultat"
-                  value={draft.outcome}
-                  onChange={(value) =>
-                    setDraft((prev) => ({ ...prev, outcome: value as DraftTrade["outcome"] }))
-                  }
-                  options={["win", "loss"]}
-                />
+              <InputField
+                label="Côté"
+                value={draft.side}
+                onChange={(value) =>
+                  setDraft((prev) => ({ ...prev, side: value as DraftTrade["side"] }))
+                }
+                options={["long", "short"]}
+              />
+              <InputField
+                label="Résultat"
+                value={draft.outcome}
+                onChange={(value) =>
+                  setDraft((prev) => ({ ...prev, outcome: value as DraftTrade["outcome"] }))
+                }
+                options={["win", "loss"]}
+              />
               <InputField
                 label="Montant (USD)"
                 type="number"
@@ -1053,118 +1239,81 @@ export default function HomePage() {
                   setDraft((prev) => ({ ...prev, amount: Number(value) || 0 }))
                 }
               />
-                <div className="md:col-span-3">
-                  <label className="text-sm font-medium text-slate-200">Note</label>
-                  <textarea
-                    value={draft.note}
-                    onChange={(e) =>
-                      setDraft((prev) => ({ ...prev, note: e.target.value.slice(0, 180) }))
-                    }
-                    className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none transition hover:border-white/20 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
-                    rows={2}
-                    placeholder="Contexte, émotions, choses à revoir..."
-                  />
-                </div>
-                <div className="md:col-span-3 flex flex-wrap gap-2">
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-[0_12px_25px_rgba(16,185,129,0.3)] transition hover:-translate-y-[1px] hover:bg-emerald-400"
-                  >
-                    <Plus size={16} />
-                    Enregistrer le trade
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDraft(draftTemplate())}
-                    className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-white/20"
-                  >
-                    Réinitialiser
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <form onSubmit={handleDeposit} className="grid gap-3 md:grid-cols-3">
-                <InputField
-                  label="Date"
-                  type="date"
-                  value={depositDraft.date}
-                  onChange={(value) => setDepositDraft((prev) => ({ ...prev, date: value }))}
-                />
-                <InputField
-                  label="Montant"
-                  type="number"
-                  value={depositDraft.amount}
-                  onChange={(value) =>
-                    setDepositDraft((prev) => ({ ...prev, amount: Number(value) || 0 }))
+              <div className="md:col-span-3">
+                <label className="text-sm font-medium text-slate-200">Note</label>
+                <textarea
+                  value={draft.note}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, note: e.target.value.slice(0, 180) }))
                   }
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none transition hover:border-white/20 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
+                  rows={3}
+                  placeholder="Contexte, émotion, choses à revoir..."
                 />
-                <InputField
-                  label="Note (opt.)"
-                  value={depositDraft.note}
-                  onChange={(value) => setDepositDraft((prev) => ({ ...prev, note: value }))}
-                  placeholder="Depot, virement..."
-                  required={false}
-                />
-                <div className="md:col-span-3 flex gap-2">
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-[0_12px_25px_rgba(16,185,129,0.3)] transition hover:-translate-y-[1px] hover:bg-emerald-400"
-                  >
-                    <Plus size={16} />
-                    Enregistrer le dépôt
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDepositDraft(depositTemplate())}
-                    className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-white/20"
-                  >
-                    Réinitialiser
-                  </button>
-                </div>
-              </form>
-            )}
-
-            <div className="mt-4 space-y-2">
-              {deposits
-                .slice()
-                .sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime())
-                .slice(0, 4)
-                .map((deposit) => (
-                  <div
-                    key={deposit.id}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-white/5 px-2 py-1 text-xs font-semibold text-slate-200">
-                        {format(parseISO(deposit.date), "dd MMM")}
-                      </span>
-                      <span>Dépôt</span>
-                      {deposit.note ? (
-                        <span className="text-xs text-slate-400">• {deposit.note}</span>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => deleteDeposit(deposit.id)}
-                        className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 hover:border-rose-400/50 hover:bg-rose-500/15 hover:text-rose-100"
-                        title="Supprimer le dépôt"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                      <span className="text-sm font-semibold text-emerald-300">
-                        +{currency.format(deposit.amount)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-            </Card>
-          </div>
-        </div>
+              </div>
+              <div className="md:col-span-3 flex flex-wrap gap-2">
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-[0_12px_25px_rgba(16,185,129,0.3)] transition hover:-translate-y-[1px] hover:bg-emerald-400"
+                >
+                  <Plus size={16} />
+                  Enregistrer le trade
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDraft(draftTemplate())}
+                  className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-white/20"
+                >
+                  Réinitialiser
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleDeposit} className="grid gap-3 md:grid-cols-3">
+              <InputField
+                label="Date"
+                type="date"
+                value={depositDraft.date}
+                onChange={(value) => setDepositDraft((prev) => ({ ...prev, date: value }))}
+              />
+              <InputField
+                label="Montant"
+                type="number"
+                value={depositDraft.amount}
+                onChange={(value) =>
+                  setDepositDraft((prev) => ({ ...prev, amount: Number(value) || 0 }))
+                }
+              />
+              <InputField
+                label="Note (opt.)"
+                value={depositDraft.note}
+                onChange={(value) => setDepositDraft((prev) => ({ ...prev, note: value }))}
+                placeholder="Depot, virement..."
+                required={false}
+              />
+              <div className="md:col-span-3 flex gap-2">
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-950 shadow-[0_12px_25px_rgba(16,185,129,0.3)] transition hover:-translate-y-[1px] hover:bg-emerald-400"
+                >
+                  <Plus size={16} />
+                  Enregistrer le dépôt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDepositDraft(depositTemplate())}
+                  className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-white/20"
+                >
+                  Réinitialiser
+                </button>
+              </div>
+            </form>
+          )}
+        </Card>
       </section>
 
       {!hydrated && (
-        <div className="text-center text-sm text-slate-500">
+        <div className="mt-4 text-center text-sm text-slate-500">
           Chargement des données locales...
         </div>
       )}
