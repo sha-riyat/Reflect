@@ -734,14 +734,47 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(25,226,122,0.1),transparent_40%)]" />
           <div className="relative flex flex-col gap-3">
             <p className="text-sm text-slate-400">Synchronisation Supabase</p>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-lg font-semibold text-slate-50">Session active</p>
-                <p className="text-sm text-slate-300">{session.user.email}</p>
+            <div className="rounded-3xl border border-emerald-500/15 bg-gradient-to-br from-[#0f1d14]/90 via-[#0c1711]/90 to-[#0d1b12]/90 p-4 shadow-inner">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-200/90">
+                    Net P&L
+                  </p>
+                  <p
+                    className={clsx(
+                      "text-2xl font-semibold",
+                      metrics.netPnl >= 0 ? "text-emerald-200" : "text-rose-200",
+                    )}
+                  >
+                    {currency.format(metrics.netPnl)}
+                  </p>
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-200/90">
+                    Capital
+                  </p>
+                  <p className="text-2xl font-semibold text-slate-50">
+                    {currency.format(netCapital)}
+                  </p>
+                </div>
               </div>
-              <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-100 ring-1 ring-emerald-500/30">
-                Connecté
-              </span>
+
+              <div className="mt-3 flex items-center gap-2 text-sm text-slate-300">
+                <LineChart size={14} className="text-emerald-300" />
+                {pnlTrend === 0
+                  ? "Stabilité sur les derniers mouvements"
+                  : `${pnlTrend > 0 ? "+" : ""}${currency.format(pnlTrend)} sur les derniers mouvements`}
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-sm text-slate-300">
+                <BadgeCheck size={14} className="text-emerald-300" />
+                {session.user.email}
+              </div>
+              <button
+                onClick={handleScrollToActions}
+                className="mt-3 w-full rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-white/15"
+              >
+                Ajouter un trade ou un dépôt
+              </button>
             </div>
             {errorRemote ? (
               <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
