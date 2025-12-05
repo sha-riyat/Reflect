@@ -156,8 +156,8 @@ const Pill = ({
   label: string;
   value: string | number;
 }) => (
-  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-300">
-    {label}: {value}
+  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200">
+    <span className="text-slate-400">{label}</span> <span className="text-slate-100">{value}</span>
   </span>
 );
 
@@ -556,13 +556,6 @@ export default function HomePage() {
     }
   };
 
-  const handleSignOut = async () => {
-    if (supabase && supabaseConfigured) {
-      await supabase.auth.signOut();
-    }
-    setState({ trades: [], deposits: [] });
-  };
-
   if (!session) {
     return (
       <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-4 px-6 pb-12 pt-12 text-slate-100">
@@ -573,9 +566,9 @@ export default function HomePage() {
               <Sparkles size={16} />
               Reflect
             </div>
-            <h1 className="text-3xl font-semibold">Connexion requise</h1>
+            <h1 className="text-3xl font-semibold">Espace sécurisé</h1>
             <p className="text-sm text-slate-300">
-              Connectez-vous pour sauvegarder vos trades et dépôts sur Supabase.
+              Connectez-vous pour synchroniser vos mouvements (trades et dépôts) sur Supabase.
             </p>
           </div>
         </header>
@@ -643,10 +636,10 @@ export default function HomePage() {
                 Reflect
               </div>
               <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
-                Journal de trading personnel
+                Tableau de bord performance
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-slate-300">
-                Une vue immersive pour suivre vos entrées, vos dépôts et vos métriques clés.
+                Suivi consolidé des gains/pertes et des dépôts, avec synchronisation Supabase.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
@@ -661,12 +654,6 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Déconnexion
-            </button>
             <a
               href="#actions"
               onClick={(e) => {
@@ -676,7 +663,7 @@ export default function HomePage() {
               className="flex items-center gap-2 rounded-xl bg-[#7af7c5] px-5 py-3 text-sm font-semibold text-[#0b0d13] shadow-[0_12px_30px_rgba(122,247,197,0.35)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_40px_rgba(122,247,197,0.45)]"
             >
               <Plus size={16} />
-              Ajouter un mouvement
+              Nouvelle saisie
             </a>
           </div>
         </div>
@@ -686,15 +673,15 @@ export default function HomePage() {
         <div className="space-y-4">
 
           <Card>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-sm font-semibold text-slate-200">
-                <Filter size={16} />
-                Filtres & tri
-              </div>
-              <Pill label="Actif" value={filters.asset === "all" ? "Tous" : filters.asset} />
-              <Pill
-                label="Résultat"
-                value={filters.outcome === "all" ? "Tous" : filters.outcome}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-sm font-semibold text-slate-200">
+              <Filter size={16} />
+              Filtrage & tri
+            </div>
+            <Pill label="Actif" value={filters.asset === "all" ? "Tous" : filters.asset} />
+            <Pill
+              label="Résultat"
+              value={filters.outcome === "all" ? "Tous" : filters.outcome}
               />
               <Pill label="Côté" value={filters.side === "all" ? "Tous" : filters.side} />
               <div className="ms-auto flex gap-2">
@@ -779,12 +766,12 @@ export default function HomePage() {
 
           <Card>
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-400">Journal</p>
-              <p className="text-xl font-semibold text-slate-50">
-                {filteredTrades.length} trades filtrés
-              </p>
-            </div>
+              <div>
+                <p className="text-sm text-slate-400">Journal consolidé</p>
+                <p className="text-xl font-semibold text-slate-50">
+                  {filteredTrades.length} trades filtrés
+                </p>
+              </div>
             <div className="flex gap-2">
               <TinyStat label="Net P&L" value={currency.format(metrics.netPnl)} />
               <TinyStat label="Capital net" value={currency.format(netCapital)} />
@@ -878,8 +865,8 @@ export default function HomePage() {
           <Card>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Tableau de bord</p>
-                <p className="text-xl font-semibold text-slate-50">Performance globale</p>
+                <p className="text-sm text-slate-400">Synthèse financière</p>
+                <p className="text-xl font-semibold text-slate-50">Performance consolidée</p>
               </div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">
                 <LineChart size={14} />
@@ -1001,11 +988,11 @@ export default function HomePage() {
             <Card className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400">Actions rapides</p>
+                  <p className="text-sm text-slate-400">Actions</p>
                   <p className="text-lg font-semibold text-slate-50">
                     Ajouter un trade ou un dépôt
-                </p>
-              </div>
+                  </p>
+                </div>
               <div className="flex gap-2 rounded-full border border-white/10 bg-white/5 p-1 text-xs font-semibold text-slate-200">
                 <button
                   onClick={() => setActionTab("trade")}
