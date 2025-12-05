@@ -171,7 +171,11 @@ const TagBadge = ({ label }: { label?: string }) =>
     </span>
   ) : null;
 
-const EquityTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+type EquityTooltipProps = TooltipProps<number, string> & {
+  payload?: { payload: EquityPoint }[];
+};
+
+const EquityTooltip = ({ active, payload }: EquityTooltipProps) => {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload as EquityPoint;
   return (
@@ -374,7 +378,9 @@ export default function HomePage() {
     };
 
     const run = async () => {
-      const { data, error } = await supabase
+      const client = supabase;
+      if (!client) return;
+      const { data, error } = await client
         .from("trades")
         .insert({ ...trade, user_id: session.user.id })
         .select()
@@ -409,7 +415,9 @@ export default function HomePage() {
       note: depositDraft.note?.trim() || undefined,
     };
     const run = async () => {
-      const { data, error } = await supabase
+      const client = supabase;
+      if (!client) return;
+      const { data, error } = await client
         .from("deposits")
         .insert({ ...deposit, user_id: session.user.id })
         .select()
@@ -512,7 +520,9 @@ export default function HomePage() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    if (supabase && supabaseConfigured) {
+      await supabase.auth.signOut();
+    }
     setState({ trades: seedTrades, deposits: seedDeposits });
   };
 
@@ -943,12 +953,13 @@ export default function HomePage() {
             </div>
           </Card>
 
-          <Card id="actions" className="space-y-4" ref={actionRef}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Actions rapides</p>
-                <p className="text-lg font-semibold text-slate-50">
-                  Ajouter un trade ou un dépôt
+          <div id="actions" ref={actionRef}>
+            <Card className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-400">Actions rapides</p>
+                  <p className="text-lg font-semibold text-slate-50">
+                    Ajouter un trade ou un dépôt
                 </p>
               </div>
               <div className="flex gap-2 rounded-full border border-white/10 bg-white/5 p-1 text-xs font-semibold text-slate-200">
@@ -1101,13 +1112,14 @@ export default function HomePage() {
                         <span className="text-xs text-slate-400">• {deposit.note}</span>
                       ) : null}
                     </div>
-                    <span className="text-sm font-semibold text-emerald-300">
-                      +{currency.format(deposit.amount)}
-                    </span>
-                  </div>
-                ))}
+                <span className="text-sm font-semibold text-emerald-300">
+                  +{currency.format(deposit.amount)}
+                </span>
+              </div>
+            ))}
             </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </section>
 
