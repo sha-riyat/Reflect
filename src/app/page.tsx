@@ -285,7 +285,7 @@ export default function HomePage() {
 
   const state: AppState = useMemo(() => {
     if (Array.isArray(rawState)) {
-      return { trades: rawState, deposits: seedDeposits };
+      return { trades: rawState, deposits: [] };
     }
     return rawState;
   }, [rawState]);
